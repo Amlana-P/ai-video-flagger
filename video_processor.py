@@ -1,19 +1,29 @@
-import subprocess
-import os
+import cv2
 
 FRAME_DIR = "frames"
 
-def extract_frames(video_path):
+def extract_frames(video):
 
-    os.makedirs(FRAME_DIR, exist_ok=True)
+    frames = []
 
-    subprocess.run([
-        "ffmpeg",
-        "-i", video_path,
-        "-vf", "fps=1",
-        f"{FRAME_DIR}/frame_%04d.jpg"
-    ])
+    cap = cv2.VideoCapture(video)
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-    frames = [f for f in os.listdir(FRAME_DIR) if f.endswith(".jpg")]
+    frame_interval = fps * 3
+
+    count = 0
+
+    while True:
+        ret, frame = cap.read()
+
+        if not ret:
+            break
+
+        if count % frame_interval == 0:
+            frames.append(frame)
+
+        count += 1
+
+    cap.release()
 
     return frames
